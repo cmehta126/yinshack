@@ -78,7 +78,22 @@ def sum_neighbor_complaints(G, officer_ids, lag, include_self=False):
 
     return ret_dict
 
-def number_high_offender_neighbors(G, officer_ids):
+def number_high_offender_neighbors(G, officer_ids, deg_thresh):
 
-    # initialize
-    return
+    # initialize number high neighbors dictionary
+    ret_dict = {}
+    for u in officer_ids:
+
+        # go through each complaint
+        high_offenders = set()
+        for c in G[u]:
+
+            # go through co-ocurring officers
+            for v in G[c]:
+
+                # add them if they are high offending
+                if G.degree[v] >= deg_thresh:
+                    high_offenders.add(v)
+                    ret_dict[u] = len(high_offenders)
+
+    return ret_dict
