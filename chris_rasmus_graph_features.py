@@ -68,7 +68,8 @@ def sum_neighbor_complaints(G, officer_ids, lag):
 
     return ret_dict
 
-def number_high_offender_neighbors(G, officer_ids):
+def number_high_offender_neighbors(G, officer_ids, deg_thresh):
 
-    # initialize
+
+    # initialize number high neighbors dictionary
     return
