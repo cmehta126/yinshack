@@ -99,7 +99,7 @@ def num_high_offender_nbrs(G, officer_ids, deg_thresh):
     return ret_dict
 
 
-def num_of_nbr_complaints_past_future(G, officer_ids, lag, deg_thresh):
+def num_of_nbr_complaints_past_future(G, officer_ids, lag):
 
     # initialize number high nbrs dictionary
     ret_dict = {}
