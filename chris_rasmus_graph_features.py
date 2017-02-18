@@ -22,7 +22,7 @@ def build_bipartite_graph(complaint_df):
 
     return G
 
-def numb_of_nbr_complaints(G, officer_ids, lag, include_self=False):
+def num_of_nbr_complaints(G, officer_ids, lag, include_self=False):
 
     # initialize  nbr complaints dictionary
     nbr_complaints = {}
