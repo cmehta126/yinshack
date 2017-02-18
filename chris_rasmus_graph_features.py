@@ -72,4 +72,13 @@ def number_high_offender_neighbors(G, officer_ids, deg_thresh):
 
 
     # initialize number high neighbors dictionary
-    return
+    ret_dict = {}
+
+    for u in officer_ids:
+        high_offenders = set()
+        for c in G[u]:
+            for v in G[c]:
+                if G.degree[v] >= deg_thresh:
+                    high_offenders.add(v)
+        ret_dict[u] = len(high_offenders)
+    return ret_dict
