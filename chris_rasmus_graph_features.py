@@ -99,7 +99,7 @@ def num_high_offender_nbrs(G, officer_ids, deg_thresh):
     return ret_dict
 
 
-def num_of_nbr_complaints_past_future(G, officer_ids, lag):
+def doublecount_num_of_nbr_complaints_past_future(G, officer_ids, lag):
 
     # initialize number high nbrs dictionary
     ret_dict = {}
@@ -108,7 +108,6 @@ def num_of_nbr_complaints_past_future(G, officer_ids, lag):
         # initialize count array
         count_array = np.zeros(2 * lag)
         # go through each complaint
-        high_offenders = set()
         for c1 in G[u]:
 
             t1 = G.get_edge_data(u, c1)['incident_date']
@@ -128,5 +127,39 @@ def num_of_nbr_complaints_past_future(G, officer_ids, lag):
 
         # put array in dictionary
         ret_dict[u] = count_array
+
+    return ret_dict
+
+def num_of_nbr_complaints_past_future(G, officer_ids, lag):
+
+    # initialize number high nbrs dictionary
+    ret_dict = {}
+    for u in officer_ids:
+
+        # initialize count array
+        future_set = [set() for i in range(lag)]
+        past_set = [set() for i in range(lag)]
+
+        # go through each complaint
+        for c1 in G[u]:
+
+            t1 = G.get_edge_data(u, c1)['incident_date']
+
+            # go through co-ocurring officers
+            for v in G[c1]:
+                if v != u:
+                    for c2 in G[v]:
+                        if c1 == c2:
+                            continue
+
+                        t2 = G.get_edge_data(v, c2)['incident_date']
+                        if t2 <= lag:
+                            if t1 > t2:
+                                past_set[t2].add(c2)
+                            else:
+                                future_set[t2].add(c2)
+
+        # put array in dictionary
+        ret_dict[u] = np.array([len(a) for a in past_set] + [len(a) for a in future_set])
 
     return ret_dict
