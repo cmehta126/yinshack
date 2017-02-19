@@ -149,17 +149,16 @@ def num_of_nbr_complaints_past_future(G, officer_ids, lag, include_self=False):
             for v in G[c1]:
                 if v != u:
                     for c2 in G[v]:
-                        if c1 == c2:
-                            continue
                         if u in G[c2] and not include_self:
                             continue
-
-                        t2 = G.get_edge_data(v, c2)['incident_date']
-                        if t2 <= lag:
-                            if t1 > t2:
+                        else:
+                            t2 = G.get_edge_data(v, c2)['incident_date']
+                            if t2 <= lag:
                                 past_set[t2].add(c2)
-                            else:
-                                future_set[t2].add(c2)
+                                # if t1 > t2:
+                                #     past_set[t2].add(c2)
+                                # else:
+                                #     future_set[t2].add(c2)
 
         # put array in dictionary
         ret_dict[u] = np.array([len(a) for a in past_set] + [len(a) for a in future_set])
