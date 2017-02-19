@@ -177,6 +177,7 @@ os.chdir(python_dir)
 from chris_rasmus_graph_features import *
 from count_lagged_complaints import *
 
+from sklearn.preprocessing import normalize
 
 r = add_complaints_by_year(2012, 4, cmpl, offc)
 
@@ -185,8 +186,11 @@ Y = add_complaints_by_year(2015, 3, cmpl, offc)
 Y=Y[[Y.columns[Y.shape[1]-1],Y.columns[Y.shape[1]-2],Y.columns[Y.shape[1]-3]]]
 Y=Y.sum(axis=1)
 
+temp = (temp-np.mean(temp))/np.std(temp)
 X = r
 X = X.drop(X.columns[[0,1,5,7,11]], axis=1)
+temp = X[X.columns[0]].astype(str).str[0:4].astype(int)
+
 X[X.columns[0]] = X[X.columns[0]].astype(str).str[0:4].astype(int)
 X_cat = X[X.columns[[1,2]]]
 XX=X_cat.apply(LabelEncoder().fit_transform)
@@ -229,19 +233,50 @@ print(correlation)
 
 
 #
-#clf = GradientBoostingRegressor(n_estimators=500,learning_rate=0.05,min_samples_split=5,
-#        min_samples_leaf=15,max_depth=5,max_features='sqrt',random_state=12,
-#        subsample =0.8,verbose=0,warm_start = True)
-#
-#predicts = cross_val_predict(clf, X, Y, cv=3)
-#
-##clf.fit(X2,Y)
-##predicts = clf.predict(X2)
-#
-#mean_squared_error(Y, predicts)
-#plt.plot(Y,predicts,'*')
-#correlation = np.corrcoef(Y, predicts)[0,1]
-#print(correlation)
+clf = GradientBoostingRegressor(n_estimators=500,learning_rate=0.05,min_samples_split=5,
+        min_samples_leaf=15,max_depth=5,max_features='sqrt',random_state=12,
+        subsample =0.8,verbose=0,warm_start = True)
+
+predicts = cross_val_predict(clf, X, Y, cv=3)
+
+#clf.fit(X2,Y)
+#predicts = clf.predict(X2)
+
+mean_squared_error(Y, predicts)
+plt.plot(Y,predicts,'*')
+correlation = np.corrcoef(Y, predicts)[0,1]
+print(correlation)
 
 
 # St
+from processing import *
+from chris_rasmus_graph_features import *
+from count_lagged_complaints import *
+
+
+scale_days = 365
+last_train_year=2012
+base_year = last_train_year
+base_month = 12
+base_day = 31
+complaint_df = add_lag_to_complaints(cmpl, scale_days, base_year, base_month, base_day)
+
+complaint_df["LAG"] = np.random.randint(0,3,13840)
+
+
+
+# build bipartite graph
+G = build_bipartite_graph(complaint_df)
+
+lag = 4
+officer_ids = [int(v) for v in offc['officer_id'].unique().tolist()]
+deg_thresh = 5
+
+complaint_df.head()
+complaint_df.dtypes
+
+# get feature dictionaries
+num_nbr_complaints_dict = num_of_nbr_complaints(G, officer_ids, lag)
+num_high_offender_nbrs = num_high_offender_nbrs(G, officer_ids, deg_thresh)
+
+type(officer_ids[0])

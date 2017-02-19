@@ -16,13 +16,15 @@ def build_bipartite_graph(complaint_df):
     for index, row in complaint_df.iterrows():
         crid = row["crid"]
         officer_id = row["officer_id"]
-        edge_data = {'LAG': row['LAG'], 'beat': row['beat_2012_geocoded'],
+        edge_data = {'LAG': int(row['LAG']), 'beat': row['beat_2012_geocoded'],
                      'category': row['complaintcategory'], 'finalfinding':row['finalfinding']}
         G.add_edge(crid, officer_id, attr_dict=edge_data)
 
     return G
 
 def num_of_nbr_complaints(G, officer_ids, lag, include_self=False):
+
+	# df['LAG'] = df['LAG'].apply(pd.to_numeric)
 
     # initialize  nbr complaints dictionary
     nbr_complaints = {}
@@ -32,6 +34,11 @@ def num_of_nbr_complaints(G, officer_ids, lag, include_self=False):
 
         # initialize nbr complaint set (divided into lags)
         nbr_set = [set() for i in range(lag)]
+        if u not in G.nodes():
+        	print('Warning: Officer ID %d is not in graph' %  u)
+        	nbr_complaints[u] = np.array([len(a) for a in nbr_set])
+        	continue
+
         for c1 in G[u]: # complaint
             for v in G[c1]: # co-complained officer
                 if v != u:
@@ -39,12 +46,15 @@ def num_of_nbr_complaints(G, officer_ids, lag, include_self=False):
                         if not include_self and u in G[c2]:
                             continue
                         else:
-                            # add the nbr to the correct lag bin
+                            # # add the nbr to the correct lag bin
+                            # # print(type(v))
+                            # print(type(c2))
+                            # assert type(v) is int
+                            # assert type(c2) is int
                             edge_data = G.get_edge_data(c2,v)
                             t = edge_data['LAG']
                             if t <= lag:
                                 nbr_set[t].add(v)
-
 
         # transform into array and store in dictionary
         nbr_complaints[u] = np.array([len(a) for a in nbr_set])
