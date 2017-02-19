@@ -153,9 +153,9 @@ def num_of_nbr_complaints_past_future(G, officer_ids, lag, include_self=False):
                             t2 = edge_data['incident_date']
                             if t2 <= lag:
                                 if t1 >= t2: # TODO: should this be strict?
-                                    past[t2].update(v)
+                                    past[t2].add(v)
                                 else:
-                                    future[t2].update(v)
+                                    future[t2].add(v)
 
 
         # transform into array and store in dictionary
