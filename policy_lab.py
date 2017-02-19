@@ -179,7 +179,7 @@ from count_lagged_complaints import *
 
 from sklearn.preprocessing import normalize
 
-cmpl2 = add_complaints_by_year(2012, 4, cmpl, offc)
+r = add_complaints_by_year(2012, 4, cmpl, offc)
 
 
 #Y = add_complaints_by_year(2015, 3, cmpl, offc)
@@ -275,9 +275,10 @@ deg_thresh = 5
 complaint_df.head()
 complaint_df.dtypes
 
+
 # get feature dictionaries
 num_nbr_complaints_dict = gf.num_of_nbr_complaints(G, officer_ids, lag)
-num_high_offender_nbrs = gf.num_high_offender_nbrs(G, officer_ids, deg_thresh)
+num_high_offenders = gf.num_high_offender_nbrs(G, officer_ids, deg_thresh)
 
 type(officer_ids[0])
 
@@ -286,3 +287,16 @@ A = np.zeros((offc.shape[0], lag+1))
 columns = ['lag_%d' % i for i in range(lag) ] + ['high_offender_nbrs']
 new_df = pd.DataFrame(A,columns)
  single_merged = new_df.merge(offc['officer_ids'])
+ 
+ 
+ 
+ 
+A=pd.DataFrame(dict([(k,pd.Series(v)) for k,v in num_nbr_complaints_dict.items()])).transpose()
+A.columns = ['cmpl0','cmpl1','cmpl2','cmpl3']
+
+B=pd.DataFrame(dict([(k,pd.Series(v)) for k,v in num_high_offenders.items()])).transpose() 
+B.columns = ['num_high_offndr']
+
+r_A = r.merge(A, left_on = 'officer_id', right_index = 1, how = 'outer')
+r_AB = r_A.merge(B, left_on = 'officer_id', right_index = 1, how = 'outer')
+r_AB.fillna(0)

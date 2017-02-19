@@ -151,9 +151,16 @@ def num_of_nbr_complaints_past_future(G, officer_ids, lag, include_self=False):
 
     # for each officer
     for u in officer_ids:  # original officer
+        
         # initialize nbr complaint set (divided into lags)
         past = [set() for i in range(lag)]
         future = [set() for i in range(lag)]
+        
+        if u not in G.nodes():
+        	# print('Warning: Officer ID %d is not in graph' %  u)
+        	ret_dict[u] = np.array([len(a) for a in past] + [len(a) for a in future])
+        	continue
+
         for c1 in G[u]:  # complaint
             t1 = G.get_edge_data(c1, u)['LAG']
             for v in G[c1]:  # co-complained officer
