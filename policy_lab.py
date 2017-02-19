@@ -179,38 +179,38 @@ from count_lagged_complaints import *
 
 from sklearn.preprocessing import normalize
 
-r = add_complaints_by_year(2012, 4, cmpl, offc)
+cmpl2 = add_complaints_by_year(2012, 4, cmpl, offc)
 
-Y = add_complaints_by_year(2015, 3, cmpl, offc)
 
-Y=Y[[Y.columns[Y.shape[1]-1],Y.columns[Y.shape[1]-2],Y.columns[Y.shape[1]-3]]]
-Y=Y.sum(axis=1)
+#Y = add_complaints_by_year(2015, 3, cmpl, offc)
+#
+#Y=Y[[Y.columns[Y.shape[1]-1],Y.columns[Y.shape[1]-2],Y.columns[Y.shape[1]-3]]]
+#Y=Y.sum(axis=1)
 
-temp = (temp-np.mean(temp))/np.std(temp)
-X = r
-X = X.drop(X.columns[[0,1,5,7,11]], axis=1)
-temp = X[X.columns[0]].astype(str).str[0:4].astype(int)
 
-X[X.columns[0]] = X[X.columns[0]].astype(str).str[0:4].astype(int)
+#X = r
+#X = X.drop(X.columns[[0,1,5,7,11]], axis=1)
+#X[X.columns[0]] = X[X.columns[0]].astype(str).str[0:4].astype(int)
+#
 X_cat = X[X.columns[[1,2]]]
-XX=X_cat.apply(LabelEncoder().fit_transform)
-
-X[X.columns[[1,2]]] = XX
-np.where(np.isnan(X))
-
+#XX=X_cat.apply(LabelEncoder().fit_transform)
+#
+#X[X.columns[[1,2]]] = XX
+#np.where(np.isnan(X))
+#
 X_race = pd.get_dummies(X['race'])
 X_race.columns = ['race0','race1','race2','race3']
-
-X = X.drop(X.columns[[1]], axis=1)
-X = X.join(X_race, how='outer')
-
-
+#
+#X = X.drop(X.columns[[1]], axis=1)
+#X = X.join(X_race, how='outer')
 
 
+    
 
-#crid = cmpl.groupby('officer_id').count()
-#offc = offc.merge(crid, left_on = 'officer_id', right_index = 1, how = 'outer')
-#Y=offc['crid']
+
+crid = cmpl.groupby('officer_id').count()
+dd = offc.merge(crid, left_on = 'officer_id', right_index = 1, how = 'outer')
+Y=dd['crid']
 
 #Y_rank = pd.get_dummies(Y['rank'])
 
@@ -250,7 +250,7 @@ print(correlation)
 
 # St
 from processing import *
-from chris_rasmus_graph_features import *
+import chris_rasmus_graph_features as gf
 from count_lagged_complaints import *
 
 
@@ -266,7 +266,7 @@ complaint_df["LAG"] = np.random.randint(0,3,13840)
 
 
 # build bipartite graph
-G = build_bipartite_graph(complaint_df)
+G = gf.build_bipartite_graph(complaint_df)
 
 lag = 4
 officer_ids = [int(v) for v in offc['officer_id'].unique().tolist()]
@@ -276,7 +276,13 @@ complaint_df.head()
 complaint_df.dtypes
 
 # get feature dictionaries
-num_nbr_complaints_dict = num_of_nbr_complaints(G, officer_ids, lag)
-num_high_offender_nbrs = num_high_offender_nbrs(G, officer_ids, deg_thresh)
+num_nbr_complaints_dict = gf.num_of_nbr_complaints(G, officer_ids, lag)
+num_high_offender_nbrs = gf.num_high_offender_nbrs(G, officer_ids, deg_thresh)
 
 type(officer_ids[0])
+
+
+A = np.zeros((offc.shape[0], lag+1))
+columns = ['lag_%d' % i for i in range(lag) ] + ['high_offender_nbrs']
+new_df = pd.DataFrame(A,columns)
+ single_merged = new_df.merge(offc['officer_ids'])

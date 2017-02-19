@@ -35,7 +35,7 @@ def num_of_nbr_complaints(G, officer_ids, lag, include_self=False):
         # initialize nbr complaint set (divided into lags)
         nbr_set = [set() for i in range(lag)]
         if u not in G.nodes():
-        	print('Warning: Officer ID %d is not in graph' %  u)
+        	# print('Warning: Officer ID %d is not in graph' %  u)
         	nbr_complaints[u] = np.array([len(a) for a in nbr_set])
         	continue
 
@@ -96,13 +96,17 @@ def num_high_offender_nbrs(G, officer_ids, deg_thresh):
 
         # go through each complaint
         high_offenders = set()
+        if u not in G.nodes():
+            # print('Warning: Officer ID %d is not in graph' %  u)
+            ret_dict[u] = len(high_offenders)
+            continue
         for c in G[u]:
 
             # go through co-ocurring officers
             for v in G[c]:
 
                 # add them if they are high offending
-                if G.degree[v] >= deg_thresh:
+                if G.degree(v) >= deg_thresh:
                     high_offenders.add(v)
                     ret_dict[u] = len(high_offenders)
 
