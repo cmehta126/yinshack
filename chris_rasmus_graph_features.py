@@ -151,7 +151,7 @@ def num_of_nbr_complaints_past_future(G, officer_ids, lag, include_self=False):
                     for c2 in G[v]:
                         if c1 == c2:
                             continue
-                        if v in G[c2] and not include_self:
+                        if u in G[c2] and not include_self:
                             continue
 
                         t2 = G.get_edge_data(v, c2)['incident_date']
