@@ -57,6 +57,6 @@ def add_complaints_by_year_and_severity(base_year, nlags, df_complaints, df_offi
     type_labels = ['LowSeverity', 'MedSeverity','HighSeverity']
     for severity in range(0,3,1):
             X = df_complaints.loc[df_complaints['complaint_type'] == severity]
-            Y = add_complaints_by_year_v2(2015, nlags, X, Y, type_labels[severity]);
+            Y = add_complaints_by_year_v2(base_year, nlags, X, Y, type_labels[severity]);
     return Y
 
