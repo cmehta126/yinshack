@@ -130,7 +130,7 @@ def doublecount_num_of_nbr_complaints_past_future(G, officer_ids, lag):
 
     return ret_dict
 
-def num_of_nbr_complaints_past_future(G, officer_ids, lag):
+def num_of_nbr_complaints_past_future(G, officer_ids, lag, include_self=False):
 
     # initialize number high nbrs dictionary
     ret_dict = {}
@@ -150,6 +150,8 @@ def num_of_nbr_complaints_past_future(G, officer_ids, lag):
                 if v != u:
                     for c2 in G[v]:
                         if c1 == c2:
+                            continue
+                        if v in G[c2] and not include_self:
                             continue
 
                         t2 = G.get_edge_data(v, c2)['incident_date']
