@@ -69,12 +69,13 @@ def num_of_nbr_complaints_typed(G, officer_ids, lag, include_self=False, thresho
 def num_of_nbr_complaints_typed_past_future(G, officer_ids, lag, include_self=False, threshold=0):
 
     # initialize  nbr complaints dictionary
-    past_nbr_complaints_0 = {}
-    past_nbr_complaints_1 = {}
-    past_nbr_complaints_2 = {}
-    future_nbr_complaints_0 = {}
-    future_nbr_complaints_1 = {}
-    future_nbr_complaints_2 = {}
+    nbr_complaints = {}
+    # past_nbr_complaints_0 = {}
+    # past_nbr_complaints_1 = {}
+    # past_nbr_complaints_2 = {}
+    # future_nbr_complaints_0 = {}
+    # future_nbr_complaints_1 = {}
+    # future_nbr_complaints_2 = {}
     
     # for each officer
     for u in officer_ids: # original officer
@@ -119,18 +120,21 @@ def num_of_nbr_complaints_typed_past_future(G, officer_ids, lag, include_self=Fa
         # # transform into array and store in dictionary
         # ret_dict[u] = np.array([len(a) for a in past] + [len(a) for a in future])
 
-        # transform into array and store in dictionary
-        past_nbr_complaints_0[u] = np.array([len(a) for a in past_nbr_set_0])
-        past_nbr_complaints_1[u] = np.array([len(a) for a in past_nbr_set_1])
-        past_nbr_complaints_2[u] = np.array([len(a) for a in past_nbr_set_2])
+        # # transform into array and store in dictionary
+        # past_nbr_complaints_0[u] = np.array([len(a) for a in past_nbr_set_0])
+        # past_nbr_complaints_1[u] = np.array([len(a) for a in past_nbr_set_1])
+        # past_nbr_complaints_2[u] = np.array([len(a) for a in past_nbr_set_2])
 
-        # transform into array and store in dictionary
-        future_nbr_complaints_0[u] = np.array([len(a) for a in future_nbr_set_0])
-        future_nbr_complaints_1[u] = np.array([len(a) for a in future_nbr_set_1])
-        future_nbr_complaints_2[u] = np.array([len(a) for a in future_nbr_set_2])
-        
-    return past_nbr_complaints_0, past_nbr_complaints_1, past_nbr_complaints_2, future_nbr_complaints_0, future_nbr_complaints_1, future_nbr_complaints_2
+        # # transform into array and store in dictionary
+        # future_nbr_complaints_0[u] = np.array([len(a) for a in future_nbr_set_0])
+        # future_nbr_complaints_1[u] = np.array([len(a) for a in future_nbr_set_1])
+        # future_nbr_complaints_2[u] = np.array([len(a) for a in future_nbr_set_2])
 
+        nbr_complaints[u] = np.array([len(a) for a in past_nbr_set_0] + [len(a) for a in past_nbr_set_1] + [len(a) for a in past_nbr_set_2] + [len(a) for a in future_nbr_set_0] + [len(a) for a in future_nbr_set_1] + [len(a) for a in future_nbr_set_2])
+
+    return nbr_complaints
+    # return past_nbr_complaints_0, past_nbr_complaints_1, past_nbr_complaints_2, future_nbr_complaints_0, future_nbr_complaints_1, future_nbr_complaints_2
+    
 def num_of_nbr_complaints(G, officer_ids, lag, include_self=False):
 
     # initialize  nbr complaints dictionary
