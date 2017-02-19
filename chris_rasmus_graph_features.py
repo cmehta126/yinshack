@@ -17,9 +17,7 @@ def build_bipartite_graph(complaint_df):
         crid = row["crid"]
         officer_id = row["officer_id"]
         edge_data = {'LAG': row['LAG'], 'beat': row['beat_2012_geocoded'],
-                     'category': row['complaintcategory'], 'finalfinding':row['finalfinding'],
-                     'severity': row['severity']
-                         }
+                     'category': row['complaintcategory'], 'finalfinding':row['finalfinding']}
         G.add_edge(crid, officer_id, attr_dict=edge_data)
 
     return G
