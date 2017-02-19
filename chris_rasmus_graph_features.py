@@ -16,8 +16,10 @@ def build_bipartite_graph(complaint_df):
     for index, row in complaint_df.iterrows():
         crid = row["crid"]
         officer_id = row["officer_id"]
-        edge_data = {'incident_date': row['incident_date'], 'beat': row['beat_2012_geocoded'],
-                     'category': row['complaintcategory'], 'finalfinding':row['finalfinding']}
+        edge_data = {'LAG': row['LAG'], 'beat': row['beat_2012_geocoded'],
+                     'category': row['complaintcategory'], 'finalfinding':row['finalfinding'],
+                     'severity': row['severity']
+                         }
         G.add_edge(crid, officer_id, attr_dict=edge_data)
 
     return G
@@ -41,7 +43,7 @@ def num_of_nbr_complaints(G, officer_ids, lag, include_self=False):
                         else:
                             # add the nbr to the correct lag bin
                             edge_data = G.get_edge_data(c2,v)
-                            t = edge_data['incident_date']
+                            t = edge_data['LAG']
                             if t <= lag:
                                 nbr_set[t].add(v)
 
@@ -69,9 +71,9 @@ def doublecount_nbr_complaints(G, officer_ids, lag, include_self=False):
                             continue
                         else:
                             edge_data = G.get_edge_data(c2, v)
-                            t = edge_data['incident_date']
+                            t = edge_data['LAG']
                             if t <= lag:
-                                nbr_complaints[edge_data['incident_date']] += 1
+                                nbr_complaints[edge_data['LAG']] += 1
                                
         # store in dictionary
         ret_dict[u] = nbr_complaints
@@ -99,7 +101,7 @@ def num_high_offender_nbrs(G, officer_ids, deg_thresh):
     return ret_dict
 
 
-def num_of_nbr_complaints_past_future(G, officer_ids, lag):
+def doublecount_num_of_nbr_complaints_past_future(G, officer_ids, lag):
 
     # initialize number high nbrs dictionary
     ret_dict = {}
@@ -108,10 +110,9 @@ def num_of_nbr_complaints_past_future(G, officer_ids, lag):
         # initialize count array
         count_array = np.zeros(2 * lag)
         # go through each complaint
-        high_offenders = set()
         for c1 in G[u]:
 
-            t1 = G.get_edge_data(u, c1)['incident_date']
+            t1 = G.get_edge_data(u, c1)['LAG']
 
             # go through co-ocurring officers
             for v in G[c1]:
@@ -120,7 +121,7 @@ def num_of_nbr_complaints_past_future(G, officer_ids, lag):
                         if c1 == c2:
                             continue
 
-                        t2 = G.get_edge_data(v, c2)['incident_date']
+                        t2 = G.get_edge_data(v, c2)['LAG']
                         if t1 > t2:
                             count_array[t2] += 1
                         else:
@@ -128,5 +129,69 @@ def num_of_nbr_complaints_past_future(G, officer_ids, lag):
 
         # put array in dictionary
         ret_dict[u] = count_array
+
+    return ret_dict
+
+def num_of_nbr_complaints_past_future(G, officer_ids, lag, include_self=False):
+
+    # initialize  nbr complaints dictionary
+    ret_dict = {}
+
+    # for each officer
+    for u in officer_ids:  # original officer
+        # initialize nbr complaint set (divided into lags)
+        past = [set() for i in range(lag)]
+        future = [set() for i in range(lag)]
+        for c1 in G[u]:  # complaint
+            t1 = G.get_edge_data(c1, u)['LAG']
+            for v in G[c1]:  # co-complained officer
+                if v != u:
+                    for c2 in G[v]:
+                        if (not include_self) and (u in G[c2]):
+                            continue
+                        else:
+                            # add the nbr to the correct lag bin
+                            edge_data = G.get_edge_data(c2, v)
+                            t2 = edge_data['LAG']
+                            if t2 <= lag:
+                                if t1 >= t2: # TODO: should this be strict?
+                                    past[t2].add(v)
+                                else:
+                                    future[t2].add(v)
+
+
+        # transform into array and store in dictionary
+        ret_dict[u] = np.array([len(a) for a in past] + [len(a) for a in future])
+
+    # # initialize number high nbrs dictionary
+    # ret_dict = {}
+    # for u in officer_ids:
+    #
+    #     # initialize count array
+    #     future_set = [set() for i in range(lag)]
+    #     past_set = [set() for i in range(lag)]
+    #
+    #     # go through each complaint
+    #     for c1 in G[u]:
+    #
+    #         t1 = G.get_edge_data(u, c1)['LAG']
+    #
+    #         # go through co-ocurring officers
+    #         for v in G[c1]:
+    #             if v != u:
+    #                 for c2 in G[v]:
+    #                     if u in G[c2] and not include_self:
+    #                         continue
+    #                     else:
+    #                         t2 = G.get_edge_data(v, c2)['LAG']
+    #                         if t2 <= lag:
+    #                             past_set[t2].add(c2)
+    #                             # if t1 > t2:
+    #                             #     past_set[t2].add(c2)
+    #                             # else:
+    #                             #     future_set[t2].add(c2)
+    #
+    #     # put array in dictionary
+    #     ret_dict[u] = np.array([len(a) for a in past_set] + [len(a) for a in future_set])
 
     return ret_dict
